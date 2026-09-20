@@ -22,6 +22,8 @@ Each profile consists of:
 | **Also switch the foreground program** | Re-routes the foreground application to the new device in addition to changing the default. Before applying the switch, SoundSwitch resets Windows per-app endpoint assignments for the profile activation to prevent stale routes. |
 | **Restore devices when trigger ends** | When enabled, the original audio configuration is restored when the triggering application closes or the trigger condition ends. |
 | **Notify when profile is triggered** | Shows a banner notification when the profile activates. |
+| **Executable on activation / deactivation** | Runs an executable or script (`.exe`, `.bat`, `.cmd`, `.ps1`) with optional arguments when the profile activates, and another one when it's superseded by a different profile. |
+| **Bluetooth device** | A paired Bluetooth device to connect when the profile activates (if it isn't already connected) and, optionally, to disconnect when the profile deactivates. |
 
 ## Trigger Types
 
@@ -78,8 +80,17 @@ Acts as a fallback: whenever the Windows default audio device changes externally
    - **Default Communication Device → Playback** — the device Windows uses for VoIP output.
    - **Default Communication Device → Recording** — the device Windows uses for VoIP input.
    - Each device has a clear (**–**) button to unset it.
-6. Add one or more **Triggers** using the "Available Triggers" dropdown and the **Add** button.
-7. Click **Save**.
+6. Optionally, set an **executable/script to run on activation and/or deactivation**, and a **Bluetooth device** to (dis)connect, in the **Actions** section.
+7. Add one or more **Triggers** using the "Available Triggers" dropdown and the **Add** button.
+8. Click **Save**.
+
+## Running an Executable or Script
+
+A profile can run an executable, batch file, or PowerShell script when it activates, and a separate one when it deactivates (i.e. when another profile takes over). Batch (`.bat`/`.cmd`) and PowerShell (`.ps1`) scripts are handed to `cmd.exe`/`powershell.exe` automatically; `.exe` files are launched directly. Arguments are optional and passed through as-is.
+
+## Reconnecting a Bluetooth Device
+
+A profile can be linked to a paired Bluetooth device. When the profile activates, SoundSwitch checks whether the device is currently connected and, if not, asks Windows to reconnect it. Optionally, the device can also be disconnected when the profile deactivates. This only works for paired classic (BR/EDR) Bluetooth audio devices — not BLE-only "LE Audio" headsets, which Windows doesn't expose the same reconnect mechanism for.
 
 ## Device Restoration
 

@@ -20,6 +20,7 @@ using System.Windows.Forms;
 
 using RailSharp;
 
+using SoundSwitch.Bluetooth;
 using SoundSwitch.Common.Framework.Audio.Device;
 using SoundSwitch.Framework.Profile;
 using SoundSwitch.Framework.Profile.Trigger;
@@ -86,6 +87,14 @@ public partial class UpsertProfileExtended : Form
         notifyCheckbox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.NotifyOnActivation), false, DataSourceUpdateMode.OnPropertyChanged);
         restoreDevicesCheckBox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.RestoreDevices), false, DataSourceUpdateMode.OnPropertyChanged);
         switchForegroundCheckbox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.SwitchForegroundApp), false, DataSourceUpdateMode.OnPropertyChanged);
+
+        startExecutablePathTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StartExecutablePath), true, DataSourceUpdateMode.OnPropertyChanged);
+        startExecutableArgsTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StartExecutableArguments), true, DataSourceUpdateMode.OnPropertyChanged);
+        stopExecutablePathTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StopExecutablePath), true, DataSourceUpdateMode.OnPropertyChanged);
+        stopExecutableArgsTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StopExecutableArguments), true, DataSourceUpdateMode.OnPropertyChanged);
+        bluetoothConnectOnActivateCheckBox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.ConnectBluetoothOnActivate), false, DataSourceUpdateMode.OnPropertyChanged);
+        bluetoothDisconnectOnDeactivateCheckBox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.DisconnectBluetoothOnDeactivate), false, DataSourceUpdateMode.OnPropertyChanged);
+        InitializeBluetoothDevices();
     }
 
     private void InitRecordingPlaybackComboBoxes(IEnumerable<DeviceFullInfo> playbacks,
@@ -142,6 +151,16 @@ public partial class UpsertProfileExtended : Form
         new ToolTip().SetToolTip(switchDefaultCheckBox, SettingsStrings.profile_defaultDevice_checkbox_tooltip);
         new ToolTip().SetToolTip(switchForegroundCheckbox, SettingsStrings.foregroundApp_tooltip);
 
+        actionsBox.Text = SettingsStrings.profile_actions_tab;
+        startExecutableLabel.Text = SettingsStrings.profile_executable_start_label;
+        stopExecutableLabel.Text = SettingsStrings.profile_executable_stop_label;
+        startExecutableArgsLabel.Text = SettingsStrings.profile_executable_args_label;
+        stopExecutableArgsLabel.Text = SettingsStrings.profile_executable_args_label;
+        selectExecutableDialog.Filter = SettingsStrings.profile_executable_filter;
+        bluetoothDeviceLabel.Text = SettingsStrings.profile_bluetooth_label;
+        bluetoothConnectOnActivateCheckBox.Text = SettingsStrings.profile_bluetooth_connectOnActivate;
+        bluetoothDisconnectOnDeactivateCheckBox.Text = SettingsStrings.profile_bluetooth_disconnectOnDeactivate;
+        new ToolTip().SetToolTip(bluetoothRefreshButton, SettingsStrings.profile_bluetooth_refresh_tooltip);
 
         _restoreDeviceToolTip = new ToolTip();
         _restoreDeviceToolTip.SetToolTip(
@@ -284,6 +303,64 @@ public partial class UpsertProfileExtended : Form
         if (selectProgramDialog.ShowDialog(this) != DialogResult.OK)
             return;
         textInput.Text = selectProgramDialog.FileName;
+    }
+
+    private void StartExecutableBrowseButton_Click(object sender, EventArgs e)
+    {
+        if (selectExecutableDialog.ShowDialog(this) != DialogResult.OK)
+            return;
+        startExecutablePathTextBox.Text = selectExecutableDialog.FileName;
+    }
+
+    private void StopExecutableBrowseButton_Click(object sender, EventArgs e)
+    {
+        if (selectExecutableDialog.ShowDialog(this) != DialogResult.OK)
+            return;
+        stopExecutablePathTextBox.Text = selectExecutableDialog.FileName;
+    }
+
+    private sealed record BluetoothDeviceOption(string Address, string Name);
+
+    private void InitializeBluetoothDevices()
+    {
+        List<BluetoothDeviceOption> devices;
+        try
+        {
+            devices = new BluetoothDeviceManager().GetPairedDevices()
+                .Select(device => new BluetoothDeviceOption(device.Address, device.Name))
+                .ToList();
+        }
+        catch (Exception)
+        {
+            devices = new List<BluetoothDeviceOption>();
+        }
+
+        if (!string.IsNullOrEmpty(_profile.BluetoothDeviceAddress) &&
+            devices.All(device => !string.Equals(device.Address, _profile.BluetoothDeviceAddress, StringComparison.OrdinalIgnoreCase)))
+        {
+            devices.Insert(0, new BluetoothDeviceOption(_profile.BluetoothDeviceAddress, _profile.BluetoothDeviceName ?? _profile.BluetoothDeviceAddress));
+        }
+
+        devices.Insert(0, new BluetoothDeviceOption("", SettingsStrings.profile_bluetooth_none));
+
+        bluetoothDeviceComboBox.DataBindings.Clear();
+        bluetoothDeviceComboBox.DataSource = devices;
+        bluetoothDeviceComboBox.DisplayMember = nameof(BluetoothDeviceOption.Name);
+        bluetoothDeviceComboBox.ValueMember = nameof(BluetoothDeviceOption.Address);
+        bluetoothDeviceComboBox.DataBindings.Add(nameof(ComboBox.SelectedValue), _profile, nameof(Profile.BluetoothDeviceAddress), true, DataSourceUpdateMode.OnPropertyChanged);
+    }
+
+    private void BluetoothRefreshButton_Click(object sender, EventArgs e)
+    {
+        InitializeBluetoothDevices();
+    }
+
+    private void BluetoothDeviceComboBox_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (bluetoothDeviceComboBox.SelectedItem is BluetoothDeviceOption option)
+        {
+            _profile.BluetoothDeviceName = string.IsNullOrEmpty(option.Address) ? null : option.Name;
+        }
     }
 
     private void PlaybackComboBox_SelectedIndexChanged(object sender, EventArgs e)

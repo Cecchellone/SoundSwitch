@@ -1294,7 +1294,106 @@ namespace SoundSwitch.Localization {
                 return ResourceManager.GetString("profile.error.deviceNotFound", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Couldn&apos;t run the executable {0}..
+        /// </summary>
+        internal static string profile_error_executableFailed {
+            get {
+                return ResourceManager.GetString("profile.error.executableFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Actions.
+        /// </summary>
+        internal static string profile_actions_tab {
+            get {
+                return ResourceManager.GetString("profile.actions.tab", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to On activation:.
+        /// </summary>
+        internal static string profile_executable_start_label {
+            get {
+                return ResourceManager.GetString("profile.executable.start.label", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to On deactivation:.
+        /// </summary>
+        internal static string profile_executable_stop_label {
+            get {
+                return ResourceManager.GetString("profile.executable.stop.label", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Args:.
+        /// </summary>
+        internal static string profile_executable_args_label {
+            get {
+                return ResourceManager.GetString("profile.executable.args.label", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Executable or script (*.exe;*.bat;*.cmd;*.ps1)|*.exe;*.bat;*.cmd;*.ps1|All files (*.*)|*.*.
+        /// </summary>
+        internal static string profile_executable_filter {
+            get {
+                return ResourceManager.GetString("profile.executable.filter", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bluetooth device:.
+        /// </summary>
+        internal static string profile_bluetooth_label {
+            get {
+                return ResourceManager.GetString("profile.bluetooth.label", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to (None).
+        /// </summary>
+        internal static string profile_bluetooth_none {
+            get {
+                return ResourceManager.GetString("profile.bluetooth.none", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Connect device when profile activates.
+        /// </summary>
+        internal static string profile_bluetooth_connectOnActivate {
+            get {
+                return ResourceManager.GetString("profile.bluetooth.connectOnActivate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Disconnect device when profile deactivates.
+        /// </summary>
+        internal static string profile_bluetooth_disconnectOnDeactivate {
+            get {
+                return ResourceManager.GetString("profile.bluetooth.disconnectOnDeactivate", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh the list of paired Bluetooth devices.
+        /// </summary>
+        internal static string profile_bluetooth_refresh_tooltip {
+            get {
+                return ResourceManager.GetString("profile.bluetooth.refresh.tooltip", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to This hotkey {0} is already registered..
         /// </summary>

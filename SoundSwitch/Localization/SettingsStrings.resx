@@ -369,6 +369,39 @@ Both: Change when any type of device is switched.</value>
   <data name="profile.error.deviceNotFound" xml:space="preserve">
     <value>Device {0} couldn't be found.</value>
   </data>
+  <data name="profile.error.executableFailed" xml:space="preserve">
+    <value>Couldn't run the executable {0}.</value>
+  </data>
+  <data name="profile.actions.tab" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="profile.executable.start.label" xml:space="preserve">
+    <value>On activation:</value>
+  </data>
+  <data name="profile.executable.stop.label" xml:space="preserve">
+    <value>On deactivation:</value>
+  </data>
+  <data name="profile.executable.args.label" xml:space="preserve">
+    <value>Args:</value>
+  </data>
+  <data name="profile.executable.filter" xml:space="preserve">
+    <value>Executable or script (*.exe;*.bat;*.cmd;*.ps1)|*.exe;*.bat;*.cmd;*.ps1|All files (*.*)|*.*</value>
+  </data>
+  <data name="profile.bluetooth.label" xml:space="preserve">
+    <value>Bluetooth device:</value>
+  </data>
+  <data name="profile.bluetooth.none" xml:space="preserve">
+    <value>(None)</value>
+  </data>
+  <data name="profile.bluetooth.connectOnActivate" xml:space="preserve">
+    <value>Connect device when profile activates</value>
+  </data>
+  <data name="profile.bluetooth.disconnectOnDeactivate" xml:space="preserve">
+    <value>Disconnect device when profile deactivates</value>
+  </data>
+  <data name="profile.bluetooth.refresh.tooltip" xml:space="preserve">
+    <value>Refresh the list of paired Bluetooth devices</value>
+  </data>
   <data name="profile.trigger.window" xml:space="preserve">
     <value>Name of the program</value>
   </data>

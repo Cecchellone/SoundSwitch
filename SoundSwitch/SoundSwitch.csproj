@@ -33,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SoundSwitch.Audio.Manager\SoundSwitch.Audio.Manager.csproj" />
+    <ProjectReference Include="..\SoundSwitch.Bluetooth\SoundSwitch.Bluetooth.csproj" />
     <ProjectReference Include="..\SoundSwitch.Common\SoundSwitch.Common.csproj" />
     <ProjectReference Include="..\SoundSwitch.IPC\SoundSwitch.IPC.csproj" />
     <ProjectReference Include="..\SoundSwitch.UI.Menu\SoundSwitch.UI.Menu.csproj" />

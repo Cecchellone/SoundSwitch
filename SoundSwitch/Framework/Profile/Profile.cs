@@ -52,6 +52,31 @@ public class Profile : IEquatable<Profile>, IDisposable
 
     public bool NotifyOnActivation { get; set; } = true;
 
+    /// <summary>
+    /// Executable (.exe/.bat/.cmd/.ps1) run, with <see cref="StartExecutableArguments"/>, when the profile activates.
+    /// </summary>
+    public string? StartExecutablePath { get; set; }
+
+    public string? StartExecutableArguments { get; set; }
+
+    /// <summary>
+    /// Executable (.exe/.bat/.cmd/.ps1) run, with <see cref="StopExecutableArguments"/>, when the profile is superseded by another one.
+    /// </summary>
+    public string? StopExecutablePath { get; set; }
+
+    public string? StopExecutableArguments { get; set; }
+
+    /// <summary>
+    /// Paired Bluetooth device address ("AA:BB:CC:DD:EE:FF") to (dis)connect alongside this profile.
+    /// </summary>
+    public string? BluetoothDeviceAddress { get; set; }
+
+    public string? BluetoothDeviceName { get; set; }
+
+    public bool ConnectBluetoothOnActivate { get; set; } = true;
+
+    public bool DisconnectBluetoothOnDeactivate { get; set; }
+
     [JsonIgnore]
     public IconHandle Icon
     {
@@ -94,6 +119,14 @@ public class Profile : IEquatable<Profile>, IDisposable
             RestoreDevices = RestoreDevices,
             NotifyOnActivation = NotifyOnActivation,
             SwitchForegroundApp = SwitchForegroundApp,
+            StartExecutablePath = StartExecutablePath,
+            StartExecutableArguments = StartExecutableArguments,
+            StopExecutablePath = StopExecutablePath,
+            StopExecutableArguments = StopExecutableArguments,
+            BluetoothDeviceAddress = BluetoothDeviceAddress,
+            BluetoothDeviceName = BluetoothDeviceName,
+            ConnectBluetoothOnActivate = ConnectBluetoothOnActivate,
+            DisconnectBluetoothOnDeactivate = DisconnectBluetoothOnDeactivate,
             Triggers = Triggers.Select(trigger => new Trigger.Trigger(trigger.Type)
                 {
                     HotKey = trigger.HotKey,

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 using RailSharp;
 using RailSharp.Internal.Result;
@@ -14,6 +15,7 @@ using Serilog;
 using SoundSwitch.Audio.Manager;
 using SoundSwitch.Audio.Manager.Interop.Com.User;
 using SoundSwitch.Audio.Manager.Interop.Enum;
+using SoundSwitch.Bluetooth;
 using SoundSwitch.Common.Framework.Audio.Collection;
 using SoundSwitch.Common.Framework.Audio.Device;
 using SoundSwitch.Framework.Audio;
@@ -38,9 +40,16 @@ public class ProfileManager
     private readonly ShowError _showError;
     private readonly TriggerFactory _triggerFactory;
     private readonly NotificationManager.NotificationManager _notificationManager;
+    private readonly IBluetoothDeviceManager _bluetoothDeviceManager;
 
     private Profile? _steamProfile;
     private Profile? _forcedProfile;
+
+    /// <summary>
+    /// The profile whose start executable/Bluetooth device was last activated, so it can be
+    /// deactivated (stop executable, optional disconnect) once another profile takes over.
+    /// </summary>
+    private Profile? _activeProfile;
 
     /// <summary>
     /// Name of the most recently triggered profile, or <c>null</c> if no profile
@@ -66,7 +75,8 @@ public class ProfileManager
         IAudioDeviceLister activeDeviceLister,
         ShowError showError,
         TriggerFactory triggerFactory,
-        NotificationManager.NotificationManager notificationManager)
+        NotificationManager.NotificationManager notificationManager,
+        IBluetoothDeviceManager? bluetoothDeviceManager = null)
     {
         _windowMonitor = windowMonitor;
         _audioSwitcher = audioSwitcher;
@@ -74,6 +84,7 @@ public class ProfileManager
         _showError = showError;
         _triggerFactory = triggerFactory;
         _notificationManager = notificationManager;
+        _bluetoothDeviceManager = bluetoothDeviceManager ?? new BluetoothDeviceManager();
         _profileHotkeyManager = new(this);
         _logger = Log.ForContext(GetType());
     }
@@ -332,6 +343,7 @@ public class ProfileManager
 
         SwitchAudio(oldState);
         oldState.Dispose();
+        _activeProfile = null;
         _activeWindowsTrigger.TryRemove(windowHandle, out _);
         return true;
     }
@@ -396,9 +408,106 @@ public class ProfileManager
         return result.IsResolved ? result.Device : null;
     }
 
+    /// <summary>
+    /// Marks <paramref name="profile"/> as the currently active one, deactivating whichever profile
+    /// was active before it (running its stop executable / disconnecting its Bluetooth device), then
+    /// running <paramref name="profile"/>'s own start executable and connecting its Bluetooth device.
+    /// </summary>
+    private void ActivateProfile(Profile profile)
+    {
+        if (_activeProfile != null && !ReferenceEquals(_activeProfile, profile))
+        {
+            DeactivateProfile(_activeProfile);
+        }
+
+        _activeProfile = profile;
+
+        RunProfileExecutable(profile.StartExecutablePath, profile.StartExecutableArguments, profile, "start");
+        HandleProfileBluetooth(profile, activating: true);
+    }
+
+    private void DeactivateProfile(Profile profile)
+    {
+        RunProfileExecutable(profile.StopExecutablePath, profile.StopExecutableArguments, profile, "stop");
+        HandleProfileBluetooth(profile, activating: false);
+    }
+
+    private void RunProfileExecutable(string? path, string? arguments, Profile profile, string phase)
+    {
+        var startInfo = ProfileExecutableRunner.BuildStartInfo(path, arguments);
+        if (startInfo == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _logger.Information("Running {Phase} executable for profile {Profile}: {Path} {Arguments}", phase, profile.Name, path, arguments);
+            Process.Start(startInfo);
+        }
+        catch (Exception e)
+        {
+            _logger.Warning(e, "Couldn't run {Phase} executable {Path} for profile {Profile}", phase, path, profile.Name);
+            _showError.Invoke(string.Format(SettingsStrings.profile_error_executableFailed, path), $"{SettingsStrings.profile_error_title}: {profile.Name}");
+        }
+    }
+
+    /// <summary>
+    /// Fires off, without blocking the caller, an attempt to connect (on activation) or disconnect
+    /// (on deactivation) the profile's configured Bluetooth device. Runs on a background task since
+    /// the underlying Win32 calls can block while Windows negotiates the radio link.
+    /// </summary>
+    private void HandleProfileBluetooth(Profile profile, bool activating)
+    {
+        var address = profile.BluetoothDeviceAddress;
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            return;
+        }
+
+        if (activating && !profile.ConnectBluetoothOnActivate)
+        {
+            return;
+        }
+
+        if (!activating && !profile.DisconnectBluetoothOnDeactivate)
+        {
+            return;
+        }
+
+        Task.Run(() =>
+        {
+            try
+            {
+                var device = _bluetoothDeviceManager.FindDevice(address);
+                if (device == null)
+                {
+                    _logger.Warning("Bluetooth device {Address} configured on profile {Profile} isn't paired anymore", address, profile.Name);
+                    return;
+                }
+
+                if (activating && !device.Connected)
+                {
+                    _logger.Information("Connecting Bluetooth device {Name} ({Address}) for profile {Profile}", device.Name, address, profile.Name);
+                    _bluetoothDeviceManager.Connect(address);
+                }
+                else if (!activating && device.Connected)
+                {
+                    _logger.Information("Disconnecting Bluetooth device {Name} ({Address}) for profile {Profile}", device.Name, address, profile.Name);
+                    _bluetoothDeviceManager.Disconnect(address);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Warning(e, "Bluetooth {Action} failed for device {Address} on profile {Profile}", activating ? "connect" : "disconnect", address, profile.Name);
+            }
+        });
+    }
+
     private void SwitchAudio(Profile profile, uint processId, TriggerFactory.Enum? triggerType = null)
     {
         _notificationManager.NotifyProfileChanged(profile, processId);
+        ActivateProfile(profile);
         if (AppConfigs.Configuration.Profiles.Any(p => p.Name == profile.Name))
         {
             LastTriggeredProfile = profile.Name;
@@ -444,6 +553,7 @@ public class ProfileManager
     public void SwitchAudio(Profile profile, TriggerFactory.Enum? triggerType = null)
     {
         _notificationManager.NotifyProfileChanged(profile, null);
+        ActivateProfile(profile);
         if (AppConfigs.Configuration.Profiles.Any(p => p.Name == profile.Name))
         {
             LastTriggeredProfile = profile.Name;

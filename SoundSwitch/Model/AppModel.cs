@@ -28,6 +28,7 @@ using RailSharp;
 using Serilog;
 
 using SoundSwitch.Audio.Manager;
+using SoundSwitch.Bluetooth;
 using SoundSwitch.Common.Framework.Audio.Collection;
 using SoundSwitch.Common.Framework.Audio.Device;
 using SoundSwitch.Framework;
@@ -153,7 +154,7 @@ public partial class AppModel : IAppModel
 
         TrayIcon = new TrayIcon();
         _notificationManager.Init();
-        ProfileManager = new ProfileManager(new WindowMonitor(), AudioSwitcher.Instance, AudioDeviceLister, TrayIcon.ShowError, new TriggerFactory(), _notificationManager);
+        ProfileManager = new ProfileManager(new WindowMonitor(), AudioSwitcher.Instance, AudioDeviceLister, TrayIcon.ShowError, new TriggerFactory(), _notificationManager, new BluetoothDeviceManager());
 
         ProfileManager
             .Init()
