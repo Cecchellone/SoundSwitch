@@ -355,6 +355,36 @@ Entrambi: Cambia quando qualsiasi tipo di dispositivo viene cambiato.</value>
   <data name="profile.error.deviceNotFound" xml:space="preserve">
     <value>Dispositivo {0} non trovato.</value>
   </data>
+  <data name="profile.error.executableFailed" xml:space="preserve">
+    <value>Impossibile eseguire {0}.</value>
+  </data>
+  <data name="profile.actions.tab" xml:space="preserve">
+    <value>Azioni</value>
+  </data>
+  <data name="profile.executable.start.label" xml:space="preserve">
+    <value>All'attivazione:</value>
+  </data>
+  <data name="profile.executable.stop.label" xml:space="preserve">
+    <value>Alla disattivazione:</value>
+  </data>
+  <data name="profile.executable.filter" xml:space="preserve">
+    <value>Eseguibile o script (*.exe;*.bat;*.cmd;*.ps1)|*.exe;*.bat;*.cmd;*.ps1|Tutti i file (*.*)|*.*</value>
+  </data>
+  <data name="profile.bluetooth.label" xml:space="preserve">
+    <value>Dispositivo Bluetooth:</value>
+  </data>
+  <data name="profile.bluetooth.none" xml:space="preserve">
+    <value>(Nessuno)</value>
+  </data>
+  <data name="profile.bluetooth.connectOnActivate" xml:space="preserve">
+    <value>Connetti il dispositivo quando il profilo si attiva</value>
+  </data>
+  <data name="profile.bluetooth.disconnectOnDeactivate" xml:space="preserve">
+    <value>Disconnetti il dispositivo quando il profilo si disattiva</value>
+  </data>
+  <data name="profile.bluetooth.refresh.tooltip" xml:space="preserve">
+    <value>Aggiorna l'elenco dei dispositivi Bluetooth accoppiati</value>
+  </data>
   <data name="profile.trigger.window" xml:space="preserve">
     <value>Nome del programma</value>
   </data>
