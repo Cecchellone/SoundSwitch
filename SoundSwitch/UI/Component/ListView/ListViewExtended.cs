@@ -13,6 +13,9 @@ public class ListViewExtended : System.Windows.Forms.ListView
 {
     private const int LVM_FIRST = 0x1000;                    // ListView messages
     private const int LVM_SETGROUPINFO = (LVM_FIRST + 147);  // ListView messages Setinfo on Group
+    private const int LVM_GETGROUPRECT = (LVM_FIRST + 98);   // ListView message: bounds of one part of a group
+    private const int LVGGR_HEADER = 1;                      // LVM_GETGROUPRECT: just the header/label band
+    private const int LVM_GETHEADER = (LVM_FIRST + 31);      // ListView message: HWND of the column header control
     private const int WM_LBUTTONUP = 0x0202;                 // Windows message left button
 
     // The common-control notifications are reflected back to the control by WinForms.
@@ -20,7 +23,6 @@ public class ListViewExtended : System.Windows.Forms.ListView
     private const int NM_CUSTOMDRAW = -12;
 
     private const uint CDDS_PREPAINT = 0x00000001;
-    private const uint CDDS_ITEMPREPAINT = 0x00010001;
     private const uint CDRF_SKIPDEFAULT = 0x00000004;
     private const uint CDRF_NOTIFYITEMDRAW = 0x00000020;
 
@@ -59,6 +61,24 @@ public class ListViewExtended : System.Windows.Forms.ListView
     /// </returns>
     [DllImport("User32.dll"), Description("Sends the specified message to a window or windows. The SendMessage function calls the window procedure for the specified window and does not return until the window procedure has processed the message. To send a message and return immediately, use the SendMessageCallback or SendNotifyMessage function. To post a message to a thread's message queue and return immediately, use the PostMessage or PostThreadMessage function.")]
     private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, LVGROUP lParam);
+
+    /// <summary>
+    /// LVM_GETGROUPRECT overload: on input, <paramref name="rect"/>.Top carries which part of
+    /// the group to measure (<see cref="LVGGR_HEADER"/>); on output it holds that part's bounds.
+    /// </summary>
+    [DllImport("User32.dll")]
+    private static extern bool SendMessage(IntPtr hWnd, int Msg, int groupId, ref RECT rect);
+
+    /// <summary>LVM_GETHEADER overload: returns the report-view column header control's HWND.</summary>
+    [DllImport("User32.dll")]
+    private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
+    /// <summary>
+    /// Applies (or clears, with null) a Windows visual-style theme class to a control, used here
+    /// to opt the native column header into its dark variant since WinForms doesn't do so itself.
+    /// </summary>
+    [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
+    private static extern int SetWindowTheme(IntPtr hWnd, string? pszSubAppName, string? pszSubIdList);
 
     private static int? GetGroupID(ListViewGroup lstvwgrp)
     {
@@ -170,6 +190,35 @@ public class ListViewExtended : System.Windows.Forms.ListView
         base.WndProc(ref m);
     }
 
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+        ApplyHeaderTheme();
+    }
+
+    protected override void OnSystemColorsChanged(EventArgs e)
+    {
+        base.OnSystemColorsChanged(e);
+        ApplyHeaderTheme();
+    }
+
+    /// <summary>
+    /// The report-view column header (SysHeader32) is a separate native child window that
+    /// doesn't follow <see cref="Application.SetColorMode"/> on its own — it keeps rendering
+    /// with light-mode colours (dark-on-dark text) unless explicitly re-themed.
+    /// </summary>
+    private void ApplyHeaderTheme()
+    {
+        if (!IsHandleCreated)
+            return;
+
+        var header = SendMessage(Handle, LVM_GETHEADER, IntPtr.Zero, IntPtr.Zero);
+        if (header == IntPtr.Zero)
+            return;
+
+        SetWindowTheme(header, WindowsThemeHelper.IsDarkModeEnabled() ? "DarkMode_Explorer" : null, null);
+    }
+
     /// <summary>
     /// Draws native ListView group headers in dark mode. Their colour and painting are
     /// owned by the native common control and are not exposed as a managed
@@ -188,35 +237,40 @@ public class ListViewExtended : System.Windows.Forms.ListView
 
         var customDraw = Marshal.PtrToStructure<NMLVCUSTOMDRAW>(m.LParam);
 
-        // Ask comctl32 for item-level notifications first; group headers are reported
-        // at CDDS_ITEMPREPAINT, not during the control-level pre-paint stage. Cache the
-        // theme decision once per paint cycle to avoid registry reads for each group.
-        if (customDraw.Nmcd.DrawStage == CDDS_PREPAINT)
+        if (customDraw.Nmcd.DrawStage != CDDS_PREPAINT)
+            return false;
+
+        if (!WindowsThemeHelper.IsDarkModeEnabled())
+            return false;
+
+        // Despite CDDS_ITEMPREPAINT being the documented stage for per-item custom draw,
+        // comctl32 reports group headers through their own CDDS_PREPAINT/CDDS_POSTPAINT pair
+        // (ItemType == LVCDI_GROUP), distinct from the control-level CDDS_PREPAINT used to
+        // opt into per-row notifications. Verified empirically: CDDS_ITEMPREPAINT never fires
+        // for groups, only for LVCDI_ITEM rows.
+        if (customDraw.ItemType == LVCDI_GROUP)
         {
-            if (!WindowsThemeHelper.IsDarkModeEnabled())
+            var groupId = (int)customDraw.Nmcd.ItemSpec;
+            var group = FindGroupByID(groupId);
+            if (group == null)
                 return false;
 
-            m.Result = (IntPtr)(long)CDRF_NOTIFYITEMDRAW;
+            // customDraw.Nmcd.Rect covers the whole group (header + every item in it), not just
+            // the header band, so it can't be used directly for the header's paint area — ask the
+            // control for that specific sub-rect instead.
+            var headerRect = new RECT { Top = LVGGR_HEADER };
+            if (!SendMessage(Handle, LVM_GETGROUPRECT, groupId, ref headerRect))
+                return false;
+
+            using var graphics = Graphics.FromHdc(customDraw.Nmcd.HDC);
+            var bounds = Rectangle.FromLTRB(headerRect.Left, headerRect.Top, headerRect.Right, headerRect.Bottom);
+            DrawGroupHeader(graphics, bounds, group);
+
+            m.Result = (IntPtr)CDRF_SKIPDEFAULT;
             return true;
         }
 
-        if (customDraw.Nmcd.DrawStage != CDDS_ITEMPREPAINT || customDraw.ItemType != LVCDI_GROUP ||
-            !WindowsThemeHelper.IsDarkModeEnabled())
-            return false;
-
-        var group = FindGroupByID((int)customDraw.Nmcd.ItemSpec);
-        if (group == null)
-            return false;
-
-        using var graphics = Graphics.FromHdc(customDraw.Nmcd.HDC);
-        var bounds = Rectangle.FromLTRB(
-            customDraw.Nmcd.Rect.Left,
-            customDraw.Nmcd.Rect.Top,
-            customDraw.Nmcd.Rect.Right,
-            customDraw.Nmcd.Rect.Bottom);
-        DrawGroupHeader(graphics, bounds, group);
-
-        m.Result = (IntPtr)CDRF_SKIPDEFAULT;
+        m.Result = (IntPtr)(long)CDRF_NOTIFYITEMDRAW;
         return true;
     }
 

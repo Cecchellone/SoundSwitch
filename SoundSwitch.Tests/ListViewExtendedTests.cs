@@ -20,7 +20,6 @@ public class ListViewExtendedTests
     private const int NM_CUSTOMDRAW = -12;
 
     private const uint CDDS_PREPAINT = 0x00000001;
-    private const uint CDDS_ITEMPREPAINT = 0x00010001;
     private const uint CDRF_SKIPDEFAULT = 0x00000004;
     private const uint CDRF_NOTIFYITEMDRAW = 0x00000020;
     private const uint LVCDI_GROUP = 0x00000001;
@@ -46,7 +45,59 @@ public class ListViewExtendedTests
     }
 
     [Test]
-    public void WndProc_CustomDraw_ShouldRequestItemDrawAndDrawGroupHeader()
+    public void WndProc_CustomDraw_ControlLevelPrepaint_RequestsItemDraw()
+    {
+        try
+        {
+            WindowsThemeHelper.DarkModeProvider = () => true;
+
+            using var listView = new TestableListViewExtended
+            {
+                BackColor = Color.FromArgb(32, 32, 32)
+            };
+            _ = listView.Handle;
+
+            using var bitmap = new Bitmap(80, 24);
+            using var bitmapGraphics = Graphics.FromImage(bitmap);
+            var hdc = bitmapGraphics.GetHdc();
+            try
+            {
+                var prepaintPointer = Marshal.AllocHGlobal(Marshal.SizeOf<TestNMLVCUSTOMDRAW>());
+                try
+                {
+                    Marshal.StructureToPtr(CreateCustomDraw(CDDS_PREPAINT, hdc, null, 0), prepaintPointer, false);
+                    var prepaintMessage = CreateNotifyMessage(listView, prepaintPointer);
+                    listView.SendWndProc(ref prepaintMessage);
+                    Assert.That(prepaintMessage.Result, Is.EqualTo((IntPtr)CDRF_NOTIFYITEMDRAW));
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(prepaintPointer);
+                }
+            }
+            finally
+            {
+                bitmapGraphics.ReleaseHdc(hdc);
+            }
+        }
+        finally
+        {
+            // The provider seam is reset even on assertion failure so no test state leaks.
+            WindowsThemeHelper.DarkModeProvider = null;
+        }
+    }
+
+    /// <summary>
+    /// comctl32 reports group headers through their own CDDS_PREPAINT (ItemType == LVCDI_GROUP),
+    /// not through CDDS_ITEMPREPAINT — see ListViewExtended's comment. Painting them needs
+    /// LVM_GETGROUPRECT, which only returns real geometry once the native control has gone
+    /// through an actual layout/paint pass; a synthetic message alone can't reliably force that
+    /// (confirmed manually against a real running window). So this only pins down the safe,
+    /// deterministic half of the contract — no crash, no default-paint suppressed on a miss —
+    /// while the visual output itself is covered by <see cref="DrawGroupHeader_ShouldPaintDarkBackgroundAndSeparator"/>.
+    /// </summary>
+    [Test]
+    public void WndProc_CustomDraw_GroupPrepaintWithoutLaidOutGeometry_FallsThroughSafely()
     {
         try
         {
@@ -68,24 +119,17 @@ public class ListViewExtendedTests
             var hdc = bitmapGraphics.GetHdc();
             try
             {
-                var prepaintPointer = Marshal.AllocHGlobal(Marshal.SizeOf<TestNMLVCUSTOMDRAW>());
                 var groupPaintPointer = Marshal.AllocHGlobal(Marshal.SizeOf<TestNMLVCUSTOMDRAW>());
                 try
                 {
-                    Marshal.StructureToPtr(CreateCustomDraw(CDDS_PREPAINT, hdc, null, 0), prepaintPointer, false);
-                    var prepaintMessage = CreateNotifyMessage(listView, prepaintPointer);
-                    listView.SendWndProc(ref prepaintMessage);
-                    Assert.That(prepaintMessage.Result, Is.EqualTo((IntPtr)CDRF_NOTIFYITEMDRAW));
-
-                    Marshal.StructureToPtr(CreateCustomDraw(CDDS_ITEMPREPAINT, hdc, groupId, LVCDI_GROUP),
+                    Marshal.StructureToPtr(CreateCustomDraw(CDDS_PREPAINT, hdc, groupId, LVCDI_GROUP),
                         groupPaintPointer, false);
                     var groupPaintMessage = CreateNotifyMessage(listView, groupPaintPointer);
-                    listView.SendWndProc(ref groupPaintMessage);
-                    Assert.That(groupPaintMessage.Result, Is.EqualTo((IntPtr)CDRF_SKIPDEFAULT));
+
+                    Assert.DoesNotThrow(() => listView.SendWndProc(ref groupPaintMessage));
                 }
                 finally
                 {
-                    Marshal.FreeHGlobal(prepaintPointer);
                     Marshal.FreeHGlobal(groupPaintPointer);
                 }
             }

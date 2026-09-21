@@ -179,7 +179,7 @@ sealed partial class SettingsForm
         closeButton.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right));
         closeButton.AutoSize = true;
         closeButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-        closeButton.Location = new System.Drawing.Point(586, 421);
+        closeButton.Location = new System.Drawing.Point(696, 455);
         closeButton.Name = "closeButton";
         closeButton.Size = new System.Drawing.Size(72, 25);
         closeButton.TabIndex = 11;
@@ -1361,7 +1361,7 @@ sealed partial class SettingsForm
         // 
         toggleMuteLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left));
         toggleMuteLabel.AutoSize = true;
-        toggleMuteLabel.Location = new System.Drawing.Point(300, 407);
+        toggleMuteLabel.Location = new System.Drawing.Point(410, 407);
         toggleMuteLabel.Name = "toggleMuteLabel";
         toggleMuteLabel.Size = new System.Drawing.Size(73, 15);
         toggleMuteLabel.TabIndex = 22;
@@ -1371,7 +1371,7 @@ sealed partial class SettingsForm
         // muteHotKey
         // 
         muteHotKey.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left));
-        muteHotKey.Location = new System.Drawing.Point(300, 426);
+        muteHotKey.Location = new System.Drawing.Point(410, 426);
         muteHotKey.Name = "muteHotKey";
         muteHotKey.Size = new System.Drawing.Size(138, 23);
         muteHotKey.TabIndex = 24;
@@ -1382,7 +1382,7 @@ sealed partial class SettingsForm
         // 
         muteHotKeyCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)(System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left));
         muteHotKeyCheckBox.AutoSize = true;
-        muteHotKeyCheckBox.Location = new System.Drawing.Point(444, 429);
+        muteHotKeyCheckBox.Location = new System.Drawing.Point(554, 429);
         muteHotKeyCheckBox.Name = "muteHotKeyCheckBox";
         muteHotKeyCheckBox.Size = new System.Drawing.Size(100, 19);
         muteHotKeyCheckBox.TabIndex = 23;
@@ -1406,7 +1406,7 @@ sealed partial class SettingsForm
         AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
         AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
         CancelButton = closeButton;
-        ClientSize = new System.Drawing.Size(670, 461);
+        ClientSize = new System.Drawing.Size(780, 495);
         Controls.Add(switchDeviceLabel);
         Controls.Add(muteHotKey);
         Controls.Add(muteHotKeyCheckBox);
@@ -1415,7 +1415,7 @@ sealed partial class SettingsForm
         Controls.Add(hotKeyCheckBox);
         Controls.Add(tabControl);
         Controls.Add(closeButton);
-        MinimumSize = new System.Drawing.Size(686, 500);
+        MinimumSize = new System.Drawing.Size(796, 534);
         Text = "Settings";
         tabControl.ResumeLayout(false);
         playbackTabPage.ResumeLayout(false);
