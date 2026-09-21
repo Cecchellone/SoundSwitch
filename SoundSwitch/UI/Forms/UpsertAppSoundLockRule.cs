@@ -32,6 +32,9 @@ public partial class UpsertAppSoundLockRule : Form
         LocalizeForm();
         InitComboBoxes(_playbacks, _recordings);
         InitializeFromRule();
+        // Run last: InitializeFromRule() adds _txtProcessPath/_chkCaseSensitive at runtime,
+        // which the theming pass needs to already be in the control tree to reach.
+        DarkModeFormTheme.Apply(this);
     }
 
     private void LocalizeForm()

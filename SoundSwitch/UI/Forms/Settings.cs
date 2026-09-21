@@ -635,10 +635,24 @@ public sealed partial class SettingsForm : Form
         if (IsDisposed || Disposing) return;
 
         var textColor = ThemeTextColor;
-        notificationsGroupBox.BackColor = NotificationPanelColor;
-        foreach (var groupBox in EnumerateControls(this).OfType<GroupBox>())
+        var panelColor = NotificationPanelColor;
+        // Neither TabPage nor GroupBox follows the framework's dark-mode palette on its own —
+        // only notificationsGroupBox got this explicitly before. TabPages that are fully covered
+        // by a Dock=Fill child (the device ListViews) hid the gap by accident; General and
+        // Notifications, laid out as GroupBoxes with space between them, show the designer-default
+        // light background straight through wherever no GroupBox covers it.
+        foreach (var control in EnumerateControls(this))
         {
-            groupBox.ForeColor = textColor;
+            switch (control)
+            {
+                case GroupBox groupBox:
+                    groupBox.ForeColor = textColor;
+                    groupBox.BackColor = panelColor;
+                    break;
+                case TabPage tabPage:
+                    tabPage.BackColor = panelColor;
+                    break;
+            }
         }
 
         // The custom-sound check sets an explicit state-dependent foreground, so it must

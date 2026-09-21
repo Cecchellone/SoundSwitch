@@ -72,6 +72,10 @@ public partial class ProcessSelectionForm : Form
     /// </summary>
     internal void ApplyTheme()
     {
+        // The DataGridView needs its own explicit styling (see below); everything else on this
+        // plain Form — the filter TextBox in particular — needs the same treatment for the same
+        // reason: only ambient-inherited controls pick up SetColorMode automatically.
+        DarkModeFormTheme.Apply(this);
         ApplyTheme(dgvProcesses, WindowsThemeHelper.IsDarkModeEnabled());
     }
 

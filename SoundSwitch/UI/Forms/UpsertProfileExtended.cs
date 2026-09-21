@@ -50,6 +50,7 @@ public partial class UpsertProfileExtended : Form
         _editing = editing;
         _triggerFactory = new TriggerFactory();
         InitializeComponent();
+        DarkModeFormTheme.Apply(this);
 
         HideTriggerComponents();
 
