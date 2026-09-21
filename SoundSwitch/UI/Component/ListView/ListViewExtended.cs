@@ -18,21 +18,31 @@ public class ListViewExtended : System.Windows.Forms.ListView
     private const int LVM_GETHEADER = (LVM_FIRST + 31);      // ListView message: HWND of the column header control
     private const int WM_LBUTTONUP = 0x0202;                 // Windows message left button
 
-    // The common-control notifications are reflected back to the control by WinForms.
+    // The common-control notifications are reflected back to the *control* that raised them by
+    // WinForms. The header isn't a managed Control (just a raw HWND from LVM_GETHEADER), so its
+    // notifications aren't reflected — they arrive as a plain WM_NOTIFY, sent to their real
+    // parent (this ListView), instead.
+    private const int WM_NOTIFY = 0x004E;
     private const int WM_REFLECT_NOTIFY = 0x204E;
     private const int NM_CUSTOMDRAW = -12;
 
     private const uint CDDS_PREPAINT = 0x00000001;
+    private const uint CDDS_ITEMPREPAINT = 0x00010001;
     private const uint CDRF_SKIPDEFAULT = 0x00000004;
     private const uint CDRF_NOTIFYITEMDRAW = 0x00000020;
 
     private const uint LVCDI_GROUP = 0x00000001;
+
+    private IntPtr _headerHandle;
 
     /// <summary>
     /// Accent used for native ListView group headers when Windows uses dark app mode.
     /// The native control normally paints them with a low-contrast blue.
     /// </summary>
     private static Color GroupHeaderDarkColor => Color.LightSkyBlue;
+
+    /// <summary>Plain label colour for column headers — no accent, matching the rest of the dark palette.</summary>
+    private static Color ColumnHeaderDarkTextColor => Color.FromArgb(240, 240, 240);
 
     private const int GroupHeaderArrowWidth = 24;
     private const int GroupHeaderPadding = 4;
@@ -184,7 +194,7 @@ public class ListViewExtended : System.Windows.Forms.ListView
     {
         if (m.Msg == WM_LBUTTONUP)
             base.DefWndProc(ref m);
-        else if (TryHandleGroupHeaderCustomDraw(ref m))
+        else if (TryHandleGroupHeaderCustomDraw(ref m) || TryHandleColumnHeaderCustomDraw(ref m))
             return;
 
         base.WndProc(ref m);
@@ -193,6 +203,7 @@ public class ListViewExtended : System.Windows.Forms.ListView
     protected override void OnHandleCreated(EventArgs e)
     {
         base.OnHandleCreated(e);
+        _headerHandle = SendMessage(Handle, LVM_GETHEADER, IntPtr.Zero, IntPtr.Zero);
         ApplyHeaderTheme();
     }
 
@@ -209,14 +220,70 @@ public class ListViewExtended : System.Windows.Forms.ListView
     /// </summary>
     private void ApplyHeaderTheme()
     {
-        if (!IsHandleCreated)
+        if (_headerHandle == IntPtr.Zero)
             return;
 
-        var header = SendMessage(Handle, LVM_GETHEADER, IntPtr.Zero, IntPtr.Zero);
-        if (header == IntPtr.Zero)
-            return;
+        // Still worth requesting even though the custom draw below repaints the background and
+        // text itself: the theme class also covers bits custom draw doesn't touch, like the
+        // sort-arrow glyph and the hover/pressed states on the divider between columns.
+        SetWindowTheme(_headerHandle, WindowsThemeHelper.IsDarkModeEnabled() ? "DarkMode_Explorer" : null, null);
+    }
 
-        SetWindowTheme(header, WindowsThemeHelper.IsDarkModeEnabled() ? "DarkMode_Explorer" : null, null);
+    /// <summary>
+    /// Draws the column header row (SysHeader32) in dark mode. <see cref="ApplyHeaderTheme"/>
+    /// asks Windows for its dark visual style, but that only gets as far as a low-contrast dark
+    /// grey label — the theme class doesn't expose a text colour to opt into. Custom draw pins
+    /// it to the same bright foreground the rest of the dark palette uses.
+    /// </summary>
+    private bool TryHandleColumnHeaderCustomDraw(ref Message m)
+    {
+        if (m.Msg != WM_NOTIFY || m.LParam == IntPtr.Zero || _headerHandle == IntPtr.Zero)
+            return false;
+
+        var nmhdr = Marshal.PtrToStructure<NMHDR>(m.LParam);
+        if (nmhdr.HwndFrom != _headerHandle || nmhdr.Code != NM_CUSTOMDRAW)
+            return false;
+
+        if (!WindowsThemeHelper.IsDarkModeEnabled())
+            return false;
+
+        var customDraw = Marshal.PtrToStructure<NMCUSTOMDRAW>(m.LParam);
+
+        if (customDraw.DrawStage == CDDS_PREPAINT)
+        {
+            m.Result = (IntPtr)(long)CDRF_NOTIFYITEMDRAW;
+            return true;
+        }
+
+        if (customDraw.DrawStage != CDDS_ITEMPREPAINT)
+            return false;
+
+        var columnIndex = (int)customDraw.ItemSpec;
+        if (columnIndex < 0 || columnIndex >= Columns.Count)
+            return false;
+
+        using var graphics = Graphics.FromHdc(customDraw.HDC);
+        var bounds = Rectangle.FromLTRB(customDraw.Rect.Left, customDraw.Rect.Top, customDraw.Rect.Right, customDraw.Rect.Bottom);
+        using var backgroundBrush = new SolidBrush(BackColor);
+        graphics.FillRectangle(backgroundBrush, bounds);
+
+        using var separatorPen = new Pen(Color.FromArgb(80, 80, 80));
+        graphics.DrawLine(separatorPen, bounds.Right - 1, bounds.Top, bounds.Right - 1, bounds.Bottom);
+        graphics.DrawLine(separatorPen, bounds.Left, bounds.Bottom - 1, bounds.Right, bounds.Bottom - 1);
+
+        var column = Columns[columnIndex];
+        var textFormat = column.TextAlign switch
+        {
+            HorizontalAlignment.Center => TextFormatFlags.HorizontalCenter,
+            HorizontalAlignment.Right => TextFormatFlags.Right,
+            _ => TextFormatFlags.Left
+        } | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.PreserveGraphicsClipping;
+
+        var textRect = Rectangle.Inflate(bounds, -GroupHeaderPadding, 0);
+        TextRenderer.DrawText(graphics, column.Text, Font, textRect, ColumnHeaderDarkTextColor, textFormat);
+
+        m.Result = (IntPtr)CDRF_SKIPDEFAULT;
+        return true;
     }
 
     /// <summary>
