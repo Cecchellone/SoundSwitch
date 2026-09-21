@@ -5,21 +5,29 @@ using System.IO;
 namespace SoundSwitch.Framework.Profile;
 
 /// <summary>
-/// Builds the <see cref="ProcessStartInfo"/> used to run a profile's start/stop executable.
+/// Builds the <see cref="ProcessStartInfo"/> used to run a profile's start/stop command.
 /// Scripts (.ps1/.bat/.cmd) aren't native executables, so Windows can't <c>CreateProcess</c> them
 /// directly with <see cref="ProcessStartInfo.UseShellExecute"/> set to <c>false</c> — they need to
 /// be handed to their interpreter instead.
 /// </summary>
 public static class ProfileExecutableRunner
 {
-    public static ProcessStartInfo? BuildStartInfo(string? path, string? arguments)
+    /// <param name="command">
+    /// A single command line: the executable/script path, optionally quoted (needed if it contains
+    /// spaces), followed by its arguments exactly as they should reach the process.
+    /// </param>
+    public static ProcessStartInfo? BuildStartInfo(string? command)
     {
-        if (string.IsNullOrWhiteSpace(path))
+        if (string.IsNullOrWhiteSpace(command))
         {
             return null;
         }
 
-        arguments ??= "";
+        var (path, arguments) = SplitCommand(command.Trim());
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
 
         var startInfo = new ProcessStartInfo
         {
@@ -46,5 +54,32 @@ public static class ProfileExecutableRunner
         }
 
         return startInfo;
+    }
+
+    /// <summary>
+    /// Splits a command line into its leading executable/script path and the remaining arguments,
+    /// following the same convention Windows uses for CreateProcess's image name: the path is
+    /// delimited by the next quote if it starts with one (allowing spaces), otherwise by whitespace.
+    /// </summary>
+    public static (string Path, string Arguments) SplitCommand(string command)
+    {
+        if (command.Length == 0)
+        {
+            return ("", "");
+        }
+
+        if (command[0] == '"')
+        {
+            var closingQuote = command.IndexOf('"', 1);
+            if (closingQuote > 0)
+            {
+                return (command[1..closingQuote], command[(closingQuote + 1)..].TrimStart());
+            }
+        }
+
+        var spaceIndex = command.IndexOf(' ');
+        return spaceIndex < 0
+            ? (command, "")
+            : (command[..spaceIndex], command[(spaceIndex + 1)..].TrimStart());
     }
 }

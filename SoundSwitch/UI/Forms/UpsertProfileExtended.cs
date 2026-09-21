@@ -88,10 +88,8 @@ public partial class UpsertProfileExtended : Form
         restoreDevicesCheckBox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.RestoreDevices), false, DataSourceUpdateMode.OnPropertyChanged);
         switchForegroundCheckbox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.SwitchForegroundApp), false, DataSourceUpdateMode.OnPropertyChanged);
 
-        startExecutablePathTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StartExecutablePath), true, DataSourceUpdateMode.OnPropertyChanged);
-        startExecutableArgsTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StartExecutableArguments), true, DataSourceUpdateMode.OnPropertyChanged);
-        stopExecutablePathTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StopExecutablePath), true, DataSourceUpdateMode.OnPropertyChanged);
-        stopExecutableArgsTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StopExecutableArguments), true, DataSourceUpdateMode.OnPropertyChanged);
+        startExecutableTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StartExecutableCommand), true, DataSourceUpdateMode.OnPropertyChanged);
+        stopExecutableTextBox.DataBindings.Add(nameof(TextBox.Text), _profile, nameof(Profile.StopExecutableCommand), true, DataSourceUpdateMode.OnPropertyChanged);
         bluetoothConnectOnActivateCheckBox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.ConnectBluetoothOnActivate), false, DataSourceUpdateMode.OnPropertyChanged);
         bluetoothDisconnectOnDeactivateCheckBox.DataBindings.Add(nameof(CheckBox.Checked), _profile, nameof(Profile.DisconnectBluetoothOnDeactivate), false, DataSourceUpdateMode.OnPropertyChanged);
         InitializeBluetoothDevices();
@@ -154,8 +152,6 @@ public partial class UpsertProfileExtended : Form
         actionsBox.Text = SettingsStrings.profile_actions_tab;
         startExecutableLabel.Text = SettingsStrings.profile_executable_start_label;
         stopExecutableLabel.Text = SettingsStrings.profile_executable_stop_label;
-        startExecutableArgsLabel.Text = SettingsStrings.profile_executable_args_label;
-        stopExecutableArgsLabel.Text = SettingsStrings.profile_executable_args_label;
         selectExecutableDialog.Filter = SettingsStrings.profile_executable_filter;
         bluetoothDeviceLabel.Text = SettingsStrings.profile_bluetooth_label;
         bluetoothConnectOnActivateCheckBox.Text = SettingsStrings.profile_bluetooth_connectOnActivate;
@@ -309,14 +305,25 @@ public partial class UpsertProfileExtended : Form
     {
         if (selectExecutableDialog.ShowDialog(this) != DialogResult.OK)
             return;
-        startExecutablePathTextBox.Text = selectExecutableDialog.FileName;
+        startExecutableTextBox.Text = ReplaceCommandPath(startExecutableTextBox.Text, selectExecutableDialog.FileName);
     }
 
     private void StopExecutableBrowseButton_Click(object sender, EventArgs e)
     {
         if (selectExecutableDialog.ShowDialog(this) != DialogResult.OK)
             return;
-        stopExecutablePathTextBox.Text = selectExecutableDialog.FileName;
+        stopExecutableTextBox.Text = ReplaceCommandPath(stopExecutableTextBox.Text, selectExecutableDialog.FileName);
+    }
+
+    /// <summary>
+    /// Swaps the leading path of a start/stop command for <paramref name="newPath"/>, keeping
+    /// whatever arguments were already typed after it.
+    /// </summary>
+    private static string ReplaceCommandPath(string command, string newPath)
+    {
+        var quotedPath = newPath.Contains(' ') ? $"\"{newPath}\"" : newPath;
+        var arguments = ProfileExecutableRunner.SplitCommand(command).Arguments;
+        return arguments.Length == 0 ? quotedPath : $"{quotedPath} {arguments}";
     }
 
     private sealed record BluetoothDeviceOption(string Address, string Name);

@@ -86,7 +86,7 @@ Acts as a fallback: whenever the Windows default audio device changes externally
 
 ## Running an Executable or Script
 
-A profile can run an executable, batch file, or PowerShell script when it activates, and a separate one when it deactivates (i.e. when another profile takes over). Batch (`.bat`/`.cmd`) and PowerShell (`.ps1`) scripts are handed to `cmd.exe`/`powershell.exe` automatically; `.exe` files are launched directly. Arguments are optional and passed through as-is.
+A profile can run an executable, batch file, or PowerShell script when it activates, and a separate one when it deactivates (i.e. when another profile takes over). Each field takes a single command line — the path, optionally quoted if it contains spaces, followed by its arguments (e.g. `C:\tools\notify.exe --profile foo`, or `"C:\Program Files\tools\notify.exe" --profile foo`). Batch (`.bat`/`.cmd`) and PowerShell (`.ps1`) scripts are handed to `cmd.exe`/`powershell.exe` automatically; `.exe` files are launched directly.
 
 ## Reconnecting a Bluetooth Device
 

@@ -66,15 +66,11 @@
             this.switchForegroundCheckbox = new System.Windows.Forms.CheckBox();
             this.actionsBox = new System.Windows.Forms.GroupBox();
             this.startExecutableLabel = new System.Windows.Forms.Label();
-            this.startExecutablePathTextBox = new System.Windows.Forms.TextBox();
+            this.startExecutableTextBox = new System.Windows.Forms.TextBox();
             this.startExecutableBrowseButton = new System.Windows.Forms.Button();
-            this.startExecutableArgsLabel = new System.Windows.Forms.Label();
-            this.startExecutableArgsTextBox = new System.Windows.Forms.TextBox();
             this.stopExecutableLabel = new System.Windows.Forms.Label();
-            this.stopExecutablePathTextBox = new System.Windows.Forms.TextBox();
+            this.stopExecutableTextBox = new System.Windows.Forms.TextBox();
             this.stopExecutableBrowseButton = new System.Windows.Forms.Button();
-            this.stopExecutableArgsLabel = new System.Windows.Forms.Label();
-            this.stopExecutableArgsTextBox = new System.Windows.Forms.TextBox();
             this.bluetoothDeviceLabel = new System.Windows.Forms.Label();
             this.bluetoothDeviceComboBox = new System.Windows.Forms.ComboBox();
             this.bluetoothRefreshButton = new System.Windows.Forms.Button();
@@ -540,15 +536,11 @@
             this.actionsBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.actionsBox.Controls.Add(this.startExecutableLabel);
-            this.actionsBox.Controls.Add(this.startExecutablePathTextBox);
+            this.actionsBox.Controls.Add(this.startExecutableTextBox);
             this.actionsBox.Controls.Add(this.startExecutableBrowseButton);
-            this.actionsBox.Controls.Add(this.startExecutableArgsLabel);
-            this.actionsBox.Controls.Add(this.startExecutableArgsTextBox);
             this.actionsBox.Controls.Add(this.stopExecutableLabel);
-            this.actionsBox.Controls.Add(this.stopExecutablePathTextBox);
+            this.actionsBox.Controls.Add(this.stopExecutableTextBox);
             this.actionsBox.Controls.Add(this.stopExecutableBrowseButton);
-            this.actionsBox.Controls.Add(this.stopExecutableArgsLabel);
-            this.actionsBox.Controls.Add(this.stopExecutableArgsTextBox);
             this.actionsBox.Controls.Add(this.bluetoothDeviceLabel);
             this.actionsBox.Controls.Add(this.bluetoothDeviceComboBox);
             this.actionsBox.Controls.Add(this.bluetoothRefreshButton);
@@ -570,16 +562,16 @@
             this.startExecutableLabel.TabIndex = 0;
             this.startExecutableLabel.Text = "On activation:";
             //
-            // startExecutablePathTextBox
+            // startExecutableTextBox
             //
-            this.startExecutablePathTextBox.Location = new System.Drawing.Point(115, 22);
-            this.startExecutablePathTextBox.Name = "startExecutablePathTextBox";
-            this.startExecutablePathTextBox.Size = new System.Drawing.Size(300, 23);
-            this.startExecutablePathTextBox.TabIndex = 1;
+            this.startExecutableTextBox.Location = new System.Drawing.Point(115, 22);
+            this.startExecutableTextBox.Name = "startExecutableTextBox";
+            this.startExecutableTextBox.Size = new System.Drawing.Size(500, 23);
+            this.startExecutableTextBox.TabIndex = 1;
             //
             // startExecutableBrowseButton
             //
-            this.startExecutableBrowseButton.Location = new System.Drawing.Point(419, 21);
+            this.startExecutableBrowseButton.Location = new System.Drawing.Point(621, 21);
             this.startExecutableBrowseButton.Name = "startExecutableBrowseButton";
             this.startExecutableBrowseButton.Size = new System.Drawing.Size(28, 23);
             this.startExecutableBrowseButton.TabIndex = 2;
@@ -587,63 +579,31 @@
             this.startExecutableBrowseButton.UseVisualStyleBackColor = true;
             this.startExecutableBrowseButton.Click += new System.EventHandler(this.StartExecutableBrowseButton_Click);
             //
-            // startExecutableArgsLabel
-            //
-            this.startExecutableArgsLabel.AutoSize = true;
-            this.startExecutableArgsLabel.Location = new System.Drawing.Point(451, 25);
-            this.startExecutableArgsLabel.Name = "startExecutableArgsLabel";
-            this.startExecutableArgsLabel.Size = new System.Drawing.Size(32, 15);
-            this.startExecutableArgsLabel.TabIndex = 3;
-            this.startExecutableArgsLabel.Text = "Args:";
-            //
-            // startExecutableArgsTextBox
-            //
-            this.startExecutableArgsTextBox.Location = new System.Drawing.Point(494, 22);
-            this.startExecutableArgsTextBox.Name = "startExecutableArgsTextBox";
-            this.startExecutableArgsTextBox.Size = new System.Drawing.Size(150, 23);
-            this.startExecutableArgsTextBox.TabIndex = 4;
-            //
             // stopExecutableLabel
             //
             this.stopExecutableLabel.AutoSize = true;
             this.stopExecutableLabel.Location = new System.Drawing.Point(9, 59);
             this.stopExecutableLabel.Name = "stopExecutableLabel";
             this.stopExecutableLabel.Size = new System.Drawing.Size(95, 15);
-            this.stopExecutableLabel.TabIndex = 5;
+            this.stopExecutableLabel.TabIndex = 3;
             this.stopExecutableLabel.Text = "On deactivation:";
             //
-            // stopExecutablePathTextBox
+            // stopExecutableTextBox
             //
-            this.stopExecutablePathTextBox.Location = new System.Drawing.Point(115, 56);
-            this.stopExecutablePathTextBox.Name = "stopExecutablePathTextBox";
-            this.stopExecutablePathTextBox.Size = new System.Drawing.Size(300, 23);
-            this.stopExecutablePathTextBox.TabIndex = 6;
+            this.stopExecutableTextBox.Location = new System.Drawing.Point(115, 56);
+            this.stopExecutableTextBox.Name = "stopExecutableTextBox";
+            this.stopExecutableTextBox.Size = new System.Drawing.Size(500, 23);
+            this.stopExecutableTextBox.TabIndex = 4;
             //
             // stopExecutableBrowseButton
             //
-            this.stopExecutableBrowseButton.Location = new System.Drawing.Point(419, 55);
+            this.stopExecutableBrowseButton.Location = new System.Drawing.Point(621, 55);
             this.stopExecutableBrowseButton.Name = "stopExecutableBrowseButton";
             this.stopExecutableBrowseButton.Size = new System.Drawing.Size(28, 23);
-            this.stopExecutableBrowseButton.TabIndex = 7;
+            this.stopExecutableBrowseButton.TabIndex = 5;
             this.stopExecutableBrowseButton.Text = "...";
             this.stopExecutableBrowseButton.UseVisualStyleBackColor = true;
             this.stopExecutableBrowseButton.Click += new System.EventHandler(this.StopExecutableBrowseButton_Click);
-            //
-            // stopExecutableArgsLabel
-            //
-            this.stopExecutableArgsLabel.AutoSize = true;
-            this.stopExecutableArgsLabel.Location = new System.Drawing.Point(451, 59);
-            this.stopExecutableArgsLabel.Name = "stopExecutableArgsLabel";
-            this.stopExecutableArgsLabel.Size = new System.Drawing.Size(32, 15);
-            this.stopExecutableArgsLabel.TabIndex = 8;
-            this.stopExecutableArgsLabel.Text = "Args:";
-            //
-            // stopExecutableArgsTextBox
-            //
-            this.stopExecutableArgsTextBox.Location = new System.Drawing.Point(494, 56);
-            this.stopExecutableArgsTextBox.Name = "stopExecutableArgsTextBox";
-            this.stopExecutableArgsTextBox.Size = new System.Drawing.Size(150, 23);
-            this.stopExecutableArgsTextBox.TabIndex = 9;
             //
             // bluetoothDeviceLabel
             //
@@ -651,7 +611,7 @@
             this.bluetoothDeviceLabel.Location = new System.Drawing.Point(9, 93);
             this.bluetoothDeviceLabel.Name = "bluetoothDeviceLabel";
             this.bluetoothDeviceLabel.Size = new System.Drawing.Size(97, 15);
-            this.bluetoothDeviceLabel.TabIndex = 10;
+            this.bluetoothDeviceLabel.TabIndex = 6;
             this.bluetoothDeviceLabel.Text = "Bluetooth device:";
             //
             // bluetoothDeviceComboBox
@@ -661,7 +621,7 @@
             this.bluetoothDeviceComboBox.Location = new System.Drawing.Point(115, 90);
             this.bluetoothDeviceComboBox.Name = "bluetoothDeviceComboBox";
             this.bluetoothDeviceComboBox.Size = new System.Drawing.Size(260, 23);
-            this.bluetoothDeviceComboBox.TabIndex = 11;
+            this.bluetoothDeviceComboBox.TabIndex = 7;
             this.bluetoothDeviceComboBox.SelectedIndexChanged += new System.EventHandler(this.BluetoothDeviceComboBox_SelectedIndexChanged);
             //
             // bluetoothRefreshButton
@@ -669,7 +629,7 @@
             this.bluetoothRefreshButton.Location = new System.Drawing.Point(379, 89);
             this.bluetoothRefreshButton.Name = "bluetoothRefreshButton";
             this.bluetoothRefreshButton.Size = new System.Drawing.Size(36, 23);
-            this.bluetoothRefreshButton.TabIndex = 12;
+            this.bluetoothRefreshButton.TabIndex = 8;
             this.bluetoothRefreshButton.Text = "↻";
             this.bluetoothRefreshButton.UseVisualStyleBackColor = true;
             this.bluetoothRefreshButton.Click += new System.EventHandler(this.BluetoothRefreshButton_Click);
@@ -680,7 +640,7 @@
             this.bluetoothConnectOnActivateCheckBox.Location = new System.Drawing.Point(9, 124);
             this.bluetoothConnectOnActivateCheckBox.Name = "bluetoothConnectOnActivateCheckBox";
             this.bluetoothConnectOnActivateCheckBox.Size = new System.Drawing.Size(238, 19);
-            this.bluetoothConnectOnActivateCheckBox.TabIndex = 13;
+            this.bluetoothConnectOnActivateCheckBox.TabIndex = 9;
             this.bluetoothConnectOnActivateCheckBox.Text = "Connect device when profile activates";
             this.bluetoothConnectOnActivateCheckBox.UseVisualStyleBackColor = true;
             //
@@ -690,7 +650,7 @@
             this.bluetoothDisconnectOnDeactivateCheckBox.Location = new System.Drawing.Point(330, 124);
             this.bluetoothDisconnectOnDeactivateCheckBox.Name = "bluetoothDisconnectOnDeactivateCheckBox";
             this.bluetoothDisconnectOnDeactivateCheckBox.Size = new System.Drawing.Size(263, 19);
-            this.bluetoothDisconnectOnDeactivateCheckBox.TabIndex = 14;
+            this.bluetoothDisconnectOnDeactivateCheckBox.TabIndex = 10;
             this.bluetoothDisconnectOnDeactivateCheckBox.Text = "Disconnect device when profile deactivates";
             this.bluetoothDisconnectOnDeactivateCheckBox.UseVisualStyleBackColor = true;
             //
@@ -766,15 +726,11 @@
         private System.Windows.Forms.CheckBox switchForegroundCheckbox;
         private System.Windows.Forms.GroupBox actionsBox;
         private System.Windows.Forms.Label startExecutableLabel;
-        private System.Windows.Forms.TextBox startExecutablePathTextBox;
+        private System.Windows.Forms.TextBox startExecutableTextBox;
         private System.Windows.Forms.Button startExecutableBrowseButton;
-        private System.Windows.Forms.Label startExecutableArgsLabel;
-        private System.Windows.Forms.TextBox startExecutableArgsTextBox;
         private System.Windows.Forms.Label stopExecutableLabel;
-        private System.Windows.Forms.TextBox stopExecutablePathTextBox;
+        private System.Windows.Forms.TextBox stopExecutableTextBox;
         private System.Windows.Forms.Button stopExecutableBrowseButton;
-        private System.Windows.Forms.Label stopExecutableArgsLabel;
-        private System.Windows.Forms.TextBox stopExecutableArgsTextBox;
         private System.Windows.Forms.Label bluetoothDeviceLabel;
         private System.Windows.Forms.ComboBox bluetoothDeviceComboBox;
         private System.Windows.Forms.Button bluetoothRefreshButton;

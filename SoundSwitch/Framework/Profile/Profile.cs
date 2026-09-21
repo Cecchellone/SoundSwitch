@@ -53,18 +53,14 @@ public class Profile : IEquatable<Profile>, IDisposable
     public bool NotifyOnActivation { get; set; } = true;
 
     /// <summary>
-    /// Executable (.exe/.bat/.cmd/.ps1) run, with <see cref="StartExecutableArguments"/>, when the profile activates.
+    /// Command line (executable or script, plus arguments) run when the profile activates.
     /// </summary>
-    public string? StartExecutablePath { get; set; }
-
-    public string? StartExecutableArguments { get; set; }
+    public string? StartExecutableCommand { get; set; }
 
     /// <summary>
-    /// Executable (.exe/.bat/.cmd/.ps1) run, with <see cref="StopExecutableArguments"/>, when the profile is superseded by another one.
+    /// Command line (executable or script, plus arguments) run when the profile is superseded by another one.
     /// </summary>
-    public string? StopExecutablePath { get; set; }
-
-    public string? StopExecutableArguments { get; set; }
+    public string? StopExecutableCommand { get; set; }
 
     /// <summary>
     /// Paired Bluetooth device address ("AA:BB:CC:DD:EE:FF") to (dis)connect alongside this profile.
@@ -119,10 +115,8 @@ public class Profile : IEquatable<Profile>, IDisposable
             RestoreDevices = RestoreDevices,
             NotifyOnActivation = NotifyOnActivation,
             SwitchForegroundApp = SwitchForegroundApp,
-            StartExecutablePath = StartExecutablePath,
-            StartExecutableArguments = StartExecutableArguments,
-            StopExecutablePath = StopExecutablePath,
-            StopExecutableArguments = StopExecutableArguments,
+            StartExecutableCommand = StartExecutableCommand,
+            StopExecutableCommand = StopExecutableCommand,
             BluetoothDeviceAddress = BluetoothDeviceAddress,
             BluetoothDeviceName = BluetoothDeviceName,
             ConnectBluetoothOnActivate = ConnectBluetoothOnActivate,

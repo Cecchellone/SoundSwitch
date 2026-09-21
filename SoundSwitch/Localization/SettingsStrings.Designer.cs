@@ -1332,15 +1332,6 @@ namespace SoundSwitch.Localization {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Args:.
-        /// </summary>
-        internal static string profile_executable_args_label {
-            get {
-                return ResourceManager.GetString("profile.executable.args.label", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Executable or script (*.exe;*.bat;*.cmd;*.ps1)|*.exe;*.bat;*.cmd;*.ps1|All files (*.*)|*.*.
         /// </summary>
         internal static string profile_executable_filter {

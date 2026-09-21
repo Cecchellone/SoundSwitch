@@ -422,19 +422,19 @@ public class ProfileManager
 
         _activeProfile = profile;
 
-        RunProfileExecutable(profile.StartExecutablePath, profile.StartExecutableArguments, profile, "start");
+        RunProfileExecutable(profile.StartExecutableCommand, profile, "start");
         HandleProfileBluetooth(profile, activating: true);
     }
 
     private void DeactivateProfile(Profile profile)
     {
-        RunProfileExecutable(profile.StopExecutablePath, profile.StopExecutableArguments, profile, "stop");
+        RunProfileExecutable(profile.StopExecutableCommand, profile, "stop");
         HandleProfileBluetooth(profile, activating: false);
     }
 
-    private void RunProfileExecutable(string? path, string? arguments, Profile profile, string phase)
+    private void RunProfileExecutable(string? command, Profile profile, string phase)
     {
-        var startInfo = ProfileExecutableRunner.BuildStartInfo(path, arguments);
+        var startInfo = ProfileExecutableRunner.BuildStartInfo(command);
         if (startInfo == null)
         {
             return;
@@ -442,13 +442,13 @@ public class ProfileManager
 
         try
         {
-            _logger.Information("Running {Phase} executable for profile {Profile}: {Path} {Arguments}", phase, profile.Name, path, arguments);
+            _logger.Information("Running {Phase} executable for profile {Profile}: {Command}", phase, profile.Name, command);
             Process.Start(startInfo);
         }
         catch (Exception e)
         {
-            _logger.Warning(e, "Couldn't run {Phase} executable {Path} for profile {Profile}", phase, path, profile.Name);
-            _showError.Invoke(string.Format(SettingsStrings.profile_error_executableFailed, path), $"{SettingsStrings.profile_error_title}: {profile.Name}");
+            _logger.Warning(e, "Couldn't run {Phase} executable {Command} for profile {Profile}", phase, command, profile.Name);
+            _showError.Invoke(string.Format(SettingsStrings.profile_error_executableFailed, command), $"{SettingsStrings.profile_error_title}: {profile.Name}");
         }
     }
 
