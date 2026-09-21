@@ -11,10 +11,9 @@ namespace SoundSwitch.Bluetooth;
 
 /// <summary>
 /// Enumerates paired Bluetooth devices and toggles their connection state through the classic
-/// Win32 Bluetooth API. <see cref="BluetoothSetServiceState"/>-style toggling (via
-/// <c>BluetoothSetServiceState</c>) is the only public mechanism Windows exposes to nudge a
-/// paired-but-idle device into reconnecting; it only works for the classic (BR/EDR) audio profiles
-/// below, not for BLE-only "LE Audio" devices.
+/// Win32 Bluetooth API. <c>BluetoothSetServiceState</c> is the only public mechanism Windows
+/// exposes to nudge a paired-but-idle device into reconnecting; it only works for the classic
+/// (BR/EDR) audio profiles below, not for BLE-only "LE Audio" devices.
 /// </summary>
 public sealed class BluetoothDeviceManager : IBluetoothDeviceManager
 {
